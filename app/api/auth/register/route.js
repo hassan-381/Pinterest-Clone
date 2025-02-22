@@ -3,10 +3,10 @@ import connectToDb from "@/libs/mongodb";
 import User from "@/models/user";
 import { NextResponse } from "next/server";
 import bcrypt from "bcrypt";
-import { resolve } from "styled-jsx/css";
 
 export async function POST(request) {
-  connectToDb();
+  // ✅ Await the database connection
+  await connectToDb();
 
   const formData = await request.formData();
   const image = formData.get("image");
@@ -15,22 +15,22 @@ export async function POST(request) {
   const password = formData.get("password");
 
   if (!image) {
-    return NextResponse.json({ error: "No file recived." }, { status: 400 });
+    return NextResponse.json({ error: "No file received." }, { status: 400 });
   }
 
   try {
     const arrayBuffer = await image.arrayBuffer();
     const buffer = new Uint8Array(arrayBuffer);
 
-    const uploadedResponse = await Promise((resolve, reject) => {
+    // ✅ Use `new Promise(...)` correctly
+    const uploadedResponse = await new Promise((resolve, reject) => {
       cloudinary.uploader
-        .upload_stream({}, function (error, result) {
+        .upload_stream({}, (error, result) => {
           if (error) {
             reject(error);
-            return;
+          } else {
+            resolve(result);
           }
-
-          resolve(result);
         })
         .end(buffer);
     });
@@ -50,12 +50,10 @@ export async function POST(request) {
         message: "User registered successfully.",
         user,
       },
-      {
-        status: 201,
-      }
+      { status: 201 }
     );
   } catch (error) {
-    console.error("User registration failed.", error);
+    console.error("❌ User registration failed:", error);
     return NextResponse.json(
       { error: "User registration failed." },
       { status: 500 }
