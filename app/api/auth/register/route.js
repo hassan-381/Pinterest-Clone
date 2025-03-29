@@ -5,8 +5,7 @@ import { NextResponse } from "next/server";
 import bcrypt from "bcrypt";
 
 export async function POST(request) {
-  // ✅ Await the database connection
-  await connectToDb();
+  connectToDb();
 
   const formData = await request.formData();
   const image = formData.get("image");
