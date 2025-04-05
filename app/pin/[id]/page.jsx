@@ -28,7 +28,7 @@ function Pin() {
   const fetchPin = async () => {
     try {
       const response = await axios.get(`/api/pin/${id}`); // Fix: Use relative URL instead of hardcoded localhost
-      console.log("Fetched Pin Data:", response.data);
+
       setPin(response.data.pin);
 
       // Fix: Ensure `likes` exists before calling `.some`
@@ -122,7 +122,6 @@ function Pin() {
                 </div>
               </div>
             </div>
-
             <h3 className="mt-10 text-2xl font-semibold">More to Explore</h3>
             <div className="flex space-x-4 overflow-x-auto py-4">
               {morePins &&

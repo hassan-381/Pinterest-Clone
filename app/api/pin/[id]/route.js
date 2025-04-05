@@ -1,13 +1,12 @@
-import connectToDB from "@/libs/mongodb";
-import Pin from "@/models/pin";
 import { NextResponse } from "next/server";
 import mongoose from "mongoose";
+import Pin from "@/models/pin";
+import connectToDB from "@/libs/mongodb";
 
 export const GET = async (req, { params }) => {
   try {
     // Ensure database connection
     await connectToDB();
-    console.log("Database connected successfully!");
 
     // Check if params and id exist
     if (!params || !params.id) {
@@ -18,7 +17,6 @@ export const GET = async (req, { params }) => {
     }
 
     const { id } = params;
-    console.log("Requested Pin ID:", id);
 
     // Validate MongoDB ObjectId
     if (!mongoose.Types.ObjectId.isValid(id)) {
@@ -30,7 +28,6 @@ export const GET = async (req, { params }) => {
 
     // Fetch pin from database
     const pin = await Pin.findById(id);
-    console.log("Fetched Pin:", pin);
 
     if (!pin) {
       return NextResponse.json(
