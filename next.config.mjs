@@ -7,13 +7,13 @@ const nextConfig = {
       {
         protocol: "https",
         hostname: "res.cloudinary.com",
-        pathname: "/dgz4gnx2n/**",
+        pathname: "/**", // More flexible path
       },
-      // {
-      //   protocol: "https",
-      //   hostname: "1h3.googleusercontent.com",
-      //   pathname: "/a/**",
-      // },
+      {
+        protocol: "https",
+        hostname: "lh3.googleusercontent.com", // Fixed hostname
+        pathname: "/a/**",
+      },
     ],
   },
 };

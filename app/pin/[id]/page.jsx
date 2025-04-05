@@ -17,21 +17,24 @@ function Pin() {
   const { id } = useParams();
   const { data: session } = useSession();
 
-  console.log("Pin ID:", id);
+  const fetchMorePins = async () => {
+    const response = await axios.get("/api/pin");
+    setMorePins(response.data.pins);
+  };
 
   useEffect(() => {
     if (typeof window !== "undefined" && id) {
       fetchPin();
+      fetchMorePins();
     }
   }, [id]);
 
   const fetchPin = async () => {
     try {
-      const response = await axios.get(`/api/pin/${id}`); // Fix: Use relative URL instead of hardcoded localhost
+      const response = await axios.get(`/api/pin/${id}`);
 
       setPin(response.data.pin);
 
-      // Fix: Ensure `likes` exists before calling `.some`
       if (response.data.pin?.likes?.length) {
         const pinLiked = response.data.pin.likes.some(
           (element) => session?.user?.name === element.user
@@ -44,7 +47,7 @@ function Pin() {
   };
 
   if (!id) {
-    return <div>Loading...</div>; // Fix: Prevent hydration issue when id is undefined
+    return <div>Loading...</div>;
   }
 
   return (
@@ -129,11 +132,13 @@ function Pin() {
                   return (
                     <Link href={`/pin/${element._id}`} key={element._id}>
                       <Image
-                        w={100}
-                        h={100}
+                        width={100}
+                        height={100}
                         src={element?.image?.url}
                         alt={"Pin"}
-                        className="w-32 h-32 rounded-lg object-cover shadow-md"
+                        className="w-32 h-32 object-cover rounded-lg shadow-md"
+                        priority={true}
+                        unoptimized={true}
                       />
                     </Link>
                   );
