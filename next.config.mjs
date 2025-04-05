@@ -3,16 +3,25 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   images: {
+    domains: ["res.cloudinary.com"], // Try this first (simple list of allowed domains)
     remotePatterns: [
       {
         protocol: "https",
         hostname: "res.cloudinary.com",
-        pathname: "/**", // More flexible path
+        port: "",
+        pathname: "/image/upload/**", // This is the exact pattern for Cloudinary
       },
       {
         protocol: "https",
-        hostname: "lh3.googleusercontent.com", // Fixed hostname
+        hostname: "lh3.googleusercontent.com",
+        port: "",
         pathname: "/a/**",
+      },
+      {
+        protocol: "https",
+        hostname: "avatars.githubusercontent.com",
+        port: "",
+        pathname: "/u/**",
       },
     ],
   },

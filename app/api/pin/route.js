@@ -4,7 +4,7 @@ import { NextResponse } from "next/server";
 import Pin from "@/models/pin";
 
 export const POST = async (req) => {
-  connectToDB();
+  await connectToDB();
 
   const formData = await req.formData();
 
@@ -41,8 +41,6 @@ export const POST = async (req) => {
       description,
       tags: tagsArray,
     });
-
-    console.log("Pin created:", pin);
     return NextResponse.json(
       {
         success: true,
@@ -63,7 +61,7 @@ export const POST = async (req) => {
 };
 
 export const GET = async (req) => {
-  connectToDB();
+  await connectToDB();
   const search = req.nextUrl.searchParams.get("search");
 
   let pins;

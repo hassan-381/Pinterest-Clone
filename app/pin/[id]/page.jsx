@@ -1,4 +1,5 @@
 "use client";
+import Comment from "@/app/components/Comment";
 import axios from "axios";
 import { Heart, Send } from "lucide-react";
 import { useSession } from "next-auth/react";
@@ -7,10 +8,11 @@ import Link from "next/link";
 import { useParams } from "next/navigation";
 import React, { useState, useEffect } from "react";
 import { ClipLoader } from "react-spinners";
+import { toast } from "react-toastify";
 
-function Pin() {
+const Pin = () => {
   const [comment, setComment] = useState("");
-  const [pin, setPin] = useState(null); // Fix: Initialize as null for better conditional rendering
+  const [pin, setPin] = useState({});
   const [morePins, setMorePins] = useState([]);
   const [isLiked, setIsLiked] = useState(false);
 
@@ -18,41 +20,86 @@ function Pin() {
   const { data: session } = useSession();
 
   const fetchMorePins = async () => {
-    const response = await axios.get("/api/pin");
+    const response = await axios.get("http://localhost:3000/api/pin");
     setMorePins(response.data.pins);
   };
 
-  useEffect(() => {
-    if (typeof window !== "undefined" && id) {
-      fetchPin();
-      fetchMorePins();
-    }
-  }, [id]);
-
   const fetchPin = async () => {
-    try {
-      const response = await axios.get(`/api/pin/${id}`);
-
-      setPin(response.data.pin);
-
-      if (response.data.pin?.likes?.length) {
-        const pinLiked = response.data.pin.likes.some(
-          (element) => session?.user?.name === element.user
-        );
-        setIsLiked(pinLiked);
-      }
-    } catch (error) {
-      console.error("Error fetching pin:", error);
+    const response = await axios.get(`http://localhost:3000/api/pin/${id}`);
+    setPin(response.data.pin);
+    const pinLiked = response.data.pin.likes.some(
+      (element) => session?.user?.name === element.user
+    );
+    if (pinLiked) {
+      setIsLiked(true);
+    } else {
+      setIsLiked(false);
     }
   };
 
-  if (!id) {
-    return <div>Loading...</div>;
-  }
+  const handlePostComment = async () => {
+    if (session && session?.user) {
+      console.log(session);
+      const profileImage = session?.user?.image;
+      const user = session?.user?.name;
+      console.log("Comment", comment);
+      console.log("User", user);
+      console.log("Profile Image", profileImage);
+      if (!comment || !profileImage || !user) {
+        toast.error("Please add a comment");
+        return;
+      }
+      try {
+        const formData = new FormData();
+        formData.append("user", user);
+        formData.append("comment", comment);
+        formData.append("profileImage", profileImage);
+
+        const res = await axios.post(
+          `http://localhost:3000/api/comments/${id}`,
+          formData,
+          {
+            headers: { "Content-Type": "application/json" },
+          }
+        );
+        if (res.status === 201) {
+          toast.success(res.data.message);
+          fetchPin();
+          setComment("");
+        }
+      } catch (error) {
+        toast.error(error.response.data.error);
+      }
+    }
+  };
+
+  const handleLikePin = async () => {
+    const response = await axios.post(
+      `http://localhost:3000/api/like/${id}`,
+      "",
+      {
+        headers: { "Content-Type": "application/json" },
+      }
+    );
+    if (response.status === 201) {
+      toast.success(response.data.message);
+      fetchPin();
+    } else if (response.status === 200) {
+      toast.success(response.data.message);
+      fetchPin();
+    } else {
+      toast.error("Internal server error");
+    }
+  };
+
+  useEffect(() => {
+    fetchPin();
+    fetchMorePins();
+  }, [id]);
 
   return (
     <>
-      {pin && pin?.image?.url ? (
+      {pin && pin?.image?.url && morePins ? (
         <div className="min-h-screen py-3 md:py-6">
           <div className="container mx-auto px-4">
             <div className="lg:flex justify-center">
@@ -64,12 +111,13 @@ function Pin() {
                   width={300}
                   height={300}
                   priority={true}
-                  unoptimized={true}
                 />
               </div>
+
               <div className="lg:w-1/3 lg:pl-10">
-                <div className="flex items-center justify-between mb-6">
+                <div className="flex justify-between items-center mb-6">
                   <Heart
+                    onClick={handleLikePin}
                     className={`${
                       isLiked
                         ? "bg-red-500 text-white hover:bg-red-700"
@@ -88,13 +136,13 @@ function Pin() {
                 </div>
                 <p>
                   {pin?.likes?.length <= 1
-                    ? `${pin?.likes?.length} like`
-                    : `${pin?.likes?.length} likes`}
+                    ? `${pin?.likes?.length} Like`
+                    : `${pin?.likes?.length} Likes`}
                 </p>
 
                 <div>
-                  <h3 className="text-xl font-semibold">
-                    {pin?.comments.length} Comments
+                  <h3 className="text-xl font-bold mb-4">
+                    {pin?.comments?.length} Comments
                   </h3>
                   <div className="max-h-96 overflow-auto">
                     {pin?.comments?.length > 0 ? (
@@ -109,18 +157,21 @@ function Pin() {
                         );
                       })
                     ) : (
-                      <p className="font-semibold text-lg"> No Comments Yet!</p>
+                      <p className="font-semibold text-lg">No Comments Yet!</p>
                     )}
                   </div>
                   <div className="mt-4 relative">
                     <input
                       type="text"
                       placeholder="Comment"
-                      className="w-full bg-gray-100 p-2 rounded-lg pr-12 focus:outline-red-500"
+                      className="w-full bg-gray-100 p-3 rounded-lg pr-12 focus:outline-red-500"
                       value={comment}
                       onChange={(e) => setComment(e.target.value)}
                     />
-                    <Send className="absolute right-2 top-1/2 transform -translate-y-1/2 text-red-500" />
+                    <Send
+                      onClick={handlePostComment}
+                      className="absolute right-[16px] top-[14px] text-red-500"
+                    />
                   </div>
                 </div>
               </div>
@@ -138,7 +189,6 @@ function Pin() {
                         alt={"Pin"}
                         className="w-32 h-32 object-cover rounded-lg shadow-md"
                         priority={true}
-                        unoptimized={true}
                       />
                     </Link>
                   );
@@ -153,6 +203,6 @@ function Pin() {
       )}
     </>
   );
-}
+};
 
 export default Pin;

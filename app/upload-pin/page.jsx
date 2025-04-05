@@ -1,18 +1,18 @@
 "use client";
 import axios from "axios";
-import { ArrowUpFromLine } from "lucide-react";
 import { useSession } from "next-auth/react";
-import Image from "next/image";
 import React, { useState } from "react";
-import { ClipLoader } from "react-spinners";
 import { toast } from "react-toastify";
+import Image from "next/image";
+import { ArrowUpFromLine } from "lucide-react";
+import { ClipLoader } from "react-spinners";
 
-function UploadPin() {
+const UploadPin = () => {
   const [image, setImage] = useState("");
   const [imagePreview, setImagePreview] = useState("");
   const [title, setTitle] = useState("");
-  const [tags, setTags] = useState("");
   const [description, setDescription] = useState("");
+  const [tags, setTags] = useState("");
   const [loading, setLoading] = useState("");
 
   const handleImage = (e) => {
@@ -20,8 +20,8 @@ function UploadPin() {
     const reader = new FileReader();
     reader.readAsDataURL(file);
     reader.onload = () => {
-      setImage(file);
       setImagePreview(reader.result);
+      setImage(file);
     };
   };
 
@@ -46,36 +46,34 @@ function UploadPin() {
     try {
       setLoading(true);
       const response = await axios.post(
-        "http://localhost:3000/api/auth/pin",
+        "http://localhost:3000/api/pin",
         formData,
         {
-          headers: {
-            "Content-Type": "multipart/form-data",
-          },
+          headers: { "Content-Type": "multipart/form-data" },
         }
       );
       setLoading(false);
       setImage("");
       setImagePreview("");
       setTitle("");
-      setTags("");
       setDescription("");
+      setTags("");
       if (response.status === 201) {
         toast.success(response.data.message);
       }
     } catch (error) {
-      toast.error("Error uploading pin, Try Again");
-      setLoading(false);
+      toast.error("Error while uploading pin, try again.");
     }
   };
+
   return (
     <>
-      <div className="mx-auto container flex flex-col min-h-screen px-5">
-        <h2 className="py-2 text-2xl font-bold sm:text-3xl sm:font-semibold md:text-4xl nd:font-normal mb-4">
+      <div className="mx-auto contianer flex flex-col min-h-screen px-5">
+        <h2 className="container mx-auto py-5 text-2xl font-bold sm:text-3xl sm:font-semibold md:text-4xl md:font-normal mb-4">
           Create Pin
         </h2>
-        <div className="w-full mx-auto max-w-[1024px] flex flex-col gap-5 md:flex-row py-7">
-          <div className="w-full sm:flex-1 gap-5  flex items-center md:justify-center ">
+        <div className="w-full mx-auto max-w-[1024px] gap-5 py-7">
+          <div className="w-full gap-5 sm:flex-1 flex items-center flex-col md:flex-row md:justify-center">
             <div
               className="bg-[#3a3a3a24] hover:cursor-pointer w-full md:w-[340px] flex items-center justify-center relative rounded-[20px] min-h-[450px]"
               onClick={() => document.getElementById("fileInput").click()}
@@ -89,20 +87,20 @@ function UploadPin() {
               {imagePreview ? (
                 <Image
                   src={imagePreview}
+                  alt={"ImagePreview"}
+                  className="rounded-[20px] w-full"
                   width={300}
                   height={300}
-                  className="rounded-[20px] w-full"
-                  alt="Image Preview"
                 />
               ) : (
                 <>
-                  <div className="flex flex-col items-center justify-center gap-5">
+                  <div className="flex flex-col items-center gap-5">
                     <ArrowUpFromLine className="bg-black w-[38px] h-[38px] p-[6px] text-white rounded-full" />
                     <p>Choose a file or drag and drop it here</p>
                   </div>
-                  <div className="absolute bottom-5 px-5 text-center">
-                    we recommend using a high quality image less then 10mb .mp4
-                    file less then 50mb.
+                  <div className="absolute bottom-5 text-center px-5">
+                    We recommend using high quality image less than 10mb or .mp4
+                    file less than 50mb.
                   </div>
                 </>
               )}
@@ -112,36 +110,36 @@ function UploadPin() {
                 <div className="flex flex-col gap-2 text-xl">
                   <label className="font-bold">Title</label>
                   <input
+                    type="text"
+                    className="focus:outline-none p-2 bg-[#3a3a3a24] rounded-[7px]"
                     placeholder="Add a title"
                     value={title}
                     onChange={(e) => setTitle(e.target.value)}
-                    type="text"
-                    className="focus:outline-none p-2 bg-[#3a3a3a24] rounded-[70x]"
                   />
                 </div>
                 <div className="flex flex-col gap-2 text-xl">
                   <label className="font-bold">Description</label>
                   <textarea
                     rows={3}
+                    className="focus:outline-none p-2 bg-[#3a3a3a24] rounded-[7px]"
                     placeholder="Add a description"
                     value={description}
                     onChange={(e) => setDescription(e.target.value)}
-                    className="focus:outline-none p-2 bg-[#3a3a3a24] rounded-[70x]"
                   />
                 </div>
                 <div className="flex flex-col gap-2 text-xl">
                   <label className="font-bold">Tags</label>
                   <input
-                    placeholder="Anime, Manga, Comics, Naruto, etc"
+                    type="text"
+                    className="focus:outline-none p-2 bg-[#3a3a3a24] rounded-[7px]"
+                    placeholder="Anime, Naruto, OnePiece"
                     value={tags}
                     onChange={(e) => setTags(e.target.value)}
-                    type="text"
-                    className="focus:outline-none p-2 bg-[#3a3a3a24] rounded-[70x]"
                   />
                 </div>
                 <button
-                  className="bg-black text-white rounded-lg p-2 text-[24px] my-5 font-bold transition-all duration-300 hover:bg-slate-950"
                   onClick={handleSubmit}
+                  className="bg-black text-white rounded-lg p-2 text-[24px] my-5 font-bold transition-all duration-300 hover:bg-slate-950"
                 >
                   {loading ? (
                     <ClipLoader color="#fff" size={20} />
@@ -156,6 +154,6 @@ function UploadPin() {
       </div>
     </>
   );
-}
+};
 
 export default UploadPin;

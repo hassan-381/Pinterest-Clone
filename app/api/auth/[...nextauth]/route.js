@@ -42,7 +42,7 @@ const authOptions = {
         }
 
         return {
-          name: user.name,
+          name: user.username,
           email: user.email,
           image: user.image,
         };
